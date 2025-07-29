@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: image-uploader
+  namespace: dev
+spec:
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: image-uploader
+  template:
+    metadata:
+      labels:
+        app: image-uploader
+    spec:
+      volumes:
+      - name: storage
+        persistentVolumeClaim:
+          claimName: image-uploader-pvc
+      containers:
+      - name: image-uploader
+        image: vlad584/image-uploader:1.7
+        imagePullPolicy: Always
+        env:
+          - name: MYSQL_DATABASE
+            valueFrom:
+              configMapKeyRef:
+                name: image-uploader-config
+                key: MYSQL_DATABASE
+          - name: MYSQL_USER
+            valueFrom:
+              configMapKeyRef:
+                name: image-uploader-config
+                key: MYSQL_USER
+          - name: MYSQL_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: image-uploader-secret
+                key: MYSQL_PASSWORD
+        volumeMounts:
+          - name: storage
+            mountPath: /app/media
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "250m"
+          limits:
+            memory: "256Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 8000
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 90
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 5
