@@ -1,0 +1,21 @@
+common:
+  name: mysql
+  namespace: dev
+
+image:
+  repository: mysql
+  tag: "8.0"
+
+resources:
+  requests:
+    memory: "512Mi"
+    cpu: "500m"
+  limits:
+    memory: "1Gi"
+    cpu: "1"
+
+ports:
+  containerPort: 3306
+  servicePort: 3306
+
+type: ClusterIP
