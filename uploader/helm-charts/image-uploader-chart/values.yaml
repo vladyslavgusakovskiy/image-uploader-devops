@@ -1,0 +1,57 @@
+common:
+  name: image-uploader
+  namespace: dev
+
+image:
+  name: image-uploader
+  repository: vlad584/image-uploader
+  tag: "1.7"
+  pullPolicy: Always
+
+rollingUpdate:
+  maxUnavailable: 1
+  maxSurge: 1
+
+resources:
+  requests:
+    memory: "128Mi"
+    cpu: "250m"
+  limits:
+    memory: "256Mi"
+    cpu: "500m"
+
+volume:
+  name: image-storage
+
+ports:
+  containerPort: 8000
+  servicePort: 80
+
+type: ClusterIP
+
+livenessProbe:
+  path: /health
+  initialDelaySeconds: 90
+  periodSeconds: 10
+
+readinessProbe:
+  path: /ready
+  initialDelaySeconds: 5
+  periodSeconds: 5
+
+hpa:
+  minReplicas: 2
+  maxReplicas: 4
+  cpu:
+    averageUtilization: 70
+  memory:
+    averageUtilization: 70
+
+env:
+  valueFrom:
+    configMapKeyRef: mysql-config
+    secretKeyRef: mysql-secret
+
+pvc:
+  requests:
+    storage: "1Gi"
