@@ -14,6 +14,10 @@ jobs:
   python-ci:
     runs-on: ubuntu-latest
 
+    defaults:
+       run:
+         working-directory: uploader
+
     steps:
     - name: Checkout Repository
       uses: actions/checkout@v4
