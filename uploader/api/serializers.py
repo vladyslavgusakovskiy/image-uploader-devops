@@ -6,6 +6,7 @@ class ImageUploadSerializer(serializers.ModelSerializer):
     class Meta:
         model = ImageUpload
         fields = '__all__'
+        read_only_fields = ['original_filename', 'content_type', 'size']
 
     def create(self, validated_data):
         image = validated_data.get('image')
