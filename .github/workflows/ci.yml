@@ -44,4 +44,11 @@ jobs:
     - name: Run Django Unit Tests
       run: python manage.py test
 
+    - name: Upload Python Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: Python-Artifacts
+        path: .
+
+
 
