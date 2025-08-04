@@ -50,5 +50,12 @@ jobs:
         name: Python-Artifacts
         path: .
 
+  build-image:
+    runs-on: ubuntu-latest
 
+    steps:
+    - uses: actions/download-artifact@v4
+      with:
+        name: Python-Artifacts
+        path: .
 
