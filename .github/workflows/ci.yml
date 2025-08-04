@@ -32,3 +32,9 @@ jobs:
     - name: Lint
       working-directory: .
       run: flake8 . --config=.flake8 --show-source --statistics
+
+    - name: Check Complexity
+      working-directory: .
+      run: flake8 . --statistics --max-complexity=10 --exit-zero
+
+
