@@ -75,4 +75,3 @@ jobs:
         context: ./uploader
         push: true
         tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:${{ github.sha }}
-
