@@ -36,7 +36,7 @@ jobs:
         pip install -r requirements.txt
 
     - name: Lint
-      # working-directory: .
+      working-directory: .
       run: flake8 . --config=.flake8 --show-source --statistics
 
     - name: Check Complexity
