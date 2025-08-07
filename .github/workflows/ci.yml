@@ -102,7 +102,7 @@ jobs:
       run: helm template image-uploader-release ./uploader/helm-charts/image-uploader-chart
 
     - name: Package Helm
-      run: helm package ./image-uploader-chart
+      run: helm package ./uploader/helm-charts/image-uploader-chart
 
     - name: Upload Helm Artifact
       uses: actions/upload-artifact@v4
