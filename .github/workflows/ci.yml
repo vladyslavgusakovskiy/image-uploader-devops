@@ -89,14 +89,14 @@ jobs:
     - name: Set Up Helm
       uses: azure/setup-helm@v4.3.0
 
-    - name: Lint Helm
-      run: helm lint ./image-uploader-chart
-
     - name: Show Working Directory
       run: pwd
 
     - name: Show All Files
       run: ls -R .
+
+    - name: Lint Helm
+      run: helm lint ./image-uploader-chart
 
     - name: Template Helm
       run: helm template image-uploader-release ./image-uploader-chart ./image-uploader-chart/values.yaml
