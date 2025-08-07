@@ -40,7 +40,6 @@ jobs:
       run: flake8 . --config=.flake8 --show-source --statistics
 
     - name: Check Complexity
-      # working-directory: .]`
       run: flake8 . --statistics --max-complexity=10 --exit-zero
 
     - name: Run Django Unit Tests
@@ -75,3 +74,37 @@ jobs:
         context: ./uploader
         push: true
         tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:${{ github.sha }}
+
+  helm-ci:
+    name: Helm CI
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/download-artifact@v4
+      with:
+        name: helm-artifacts
+        path: .
+
+    - name: Set Up Helm
+      uses: azure/setup-helm@v4.3.0
+
+    - name: Lint Helm
+      run: helm lint ./image-uploader-chart
+
+    - name: Show Working Directory
+      run: pwd
+
+    - name: Show All Files
+      run: ls -R .
+
+    - name: Template Helm
+      run: helm template image-uploader-release ./image-uploader-chart ./image-uploader-chart/values.yaml
+
+    - name: Package Helm
+      run: helm package ./image-uploader-chart
+
+    - name: Upload Helm Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: helm-package
+        path: ./*.tgz
