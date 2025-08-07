@@ -99,7 +99,7 @@ jobs:
       run: helm lint ./uploader/helm-charts/image-uploader-chart
 
     - name: Template Helm
-      run: helm template image-uploader-release ./image-uploader-chart ./image-uploader-chart/values.yaml
+      run: helm template image-uploader-release ./image-uploader-chart
 
     - name: Package Helm
       run: helm package ./image-uploader-chart
