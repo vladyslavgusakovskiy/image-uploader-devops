@@ -96,7 +96,7 @@ jobs:
       run: ls -R .
 
     - name: Lint Helm
-      run: helm lint ./image-uploader-chart
+      run: helm lint /uploader/helm-charts/image-uploader-chart
 
     - name: Template Helm
       run: helm template image-uploader-release ./image-uploader-chart ./image-uploader-chart/values.yaml
