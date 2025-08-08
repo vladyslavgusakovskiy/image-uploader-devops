@@ -131,7 +131,8 @@ jobs:
       run: ls -R .
 
     - name: Deploy Helm
-      run: helm upgrade --install --atomic --wait --timeout 3600s --debug image-uploader-release image-uploader-*.tgz \
-        -f ./uploader/helm-charts/image-uploader-chart/values.yaml
-        -- set image.repository=vlad584/image-uploader
-        -- set image.tag=${{ github.sha }}
+      run: |
+        helm upgrade --install --atomic --wait --timeout 3600s --debug image-uploader-release image-uploader-*.tgz \
+        -f ./uploader/helm-charts/image-uploader-chart/values.yaml \
+        -- set image.repository=vlad584/image-uploader \
+        -- set image.tag=${{ github.sha }} \
