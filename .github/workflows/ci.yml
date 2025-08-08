@@ -131,4 +131,4 @@ jobs:
       run: ls -R .
 
     - name: Deploy Helm
-      run: helm upgrade --install --atomic --wait --timeout 3600s --debug image-uploader-release image-uploader-chart-0.1.0.tgz  \
+      run: helm upgrade --install --atomic --wait --timeout 3600s --debug image-uploader-release image-uploader-*.tgz
