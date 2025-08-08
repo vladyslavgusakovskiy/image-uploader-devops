@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+.env
+media/
+venv/
+*.sqlite3
+uploader/.DS_Store
+.DS_Store
+../.DS_Store
+uploader/.gitignore
+uploader/.dockerignore

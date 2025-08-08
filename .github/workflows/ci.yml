@@ -1,0 +1,137 @@
+name: CI/CD Pipeline for Django App
+run-name: ${{ github.actor }} - ${{ github.ref_name }}
+
+on:
+  push:
+    branches: ["main", "develop"]
+  pull_request:
+    branches: ["main", "develop"]
+
+env:
+  PYTHON_VERSION: 3.8
+  DOCKER_IMAGE_NAME: image-uploader
+
+jobs:
+  python-ci:
+    name: Python CI
+    runs-on: ubuntu-latest
+
+    defaults:
+       run:
+         working-directory: uploader
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python ${{ env.PYTHON_VERSION }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install flake8 pytest
+        pip install -r requirements.txt
+
+    - name: Lint
+      working-directory: .
+      run: flake8 . --config=.flake8 --show-source --statistics
+
+    - name: Check Complexity
+      run: flake8 . --statistics --max-complexity=10 --exit-zero
+
+    - name: Run Django Unit Tests
+      run: python manage.py test
+
+    - name: Upload Python Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: python-artifacts
+        path: .
+
+  build-image:
+    name: Build and Push Image
+    needs: python-ci
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/download-artifact@v4
+      with:
+        name: python-artifacts
+        path: .
+
+    - name: Login to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    - name: Build and push
+      uses: docker/build-push-action@v6
+      with:
+        context: ./uploader
+        push: true
+        tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:${{ github.sha }}
+
+  helm-ci:
+    name: Helm CI
+    needs: python-ci
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/download-artifact@v4
+      with:
+        name: python-artifacts
+        path: .
+
+    - name: Setup Helm
+      uses: azure/setup-helm@v4.3.0
+
+    - name: Lint Helm
+      run: helm lint ./uploader/helm-charts/image-uploader-chart
+
+    - name: Template Helm
+      run: helm template image-uploader-release ./uploader/helm-charts/image-uploader-chart
+
+    - name: Package Helm
+      run: helm package ./uploader/helm-charts/image-uploader-chart
+
+    - name: Upload Helm Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: helm-package
+        path: ./*.tgz
+
+  deploy-helm:
+    name: Helm CD
+    needs: [python-ci, build-image, helm-ci]
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/download-artifact@v4
+      with:
+        name: helm-package
+        path: .
+
+    - name: Setup Helm
+      uses: azure/setup-helm@v4.3.0
+
+    - name: Create k8s Kind Cluster
+      uses: helm/kind-action@v1
+
+    - name: Setup Kubectl
+      uses: azure/setup-kubectl@v4
+
+    - name: Show Working Directory
+      run: pwd
+
+    - name: Show All Files
+      run: ls -R .
+
+    - name: Deploy Helm
+      run: |
+        helm upgrade --install --atomic --wait --timeout 3600s --debug image-uploader-release image-uploader-*.tgz \
+          --set image.repository=vlad584/image-uploader \
+          --set image.tag=${{ github.sha }} \
