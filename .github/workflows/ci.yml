@@ -106,7 +106,7 @@ jobs:
 
   deploy-helm:
     name: Helm CD
-    needs: [python-ci, build-image]
+    needs: [python-ci, build-image, helm-ci]
     runs-on: ubuntu-latest
 
     steps:
